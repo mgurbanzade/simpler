@@ -26,12 +26,21 @@ module Simpler
       @router.instance_eval(&block)
     end
 
-    def call(env)
-      route = @router.route_for(env)
+    def set_controller_action
       controller = route.controller.new(env)
       action = route.action
-
       make_response(controller, action)
+    end
+
+    def not_found
+      [404, {'Content-Type' => 'text/plain'}, ['404 Not Found']]
+    end
+
+    def call(env)
+      route = @router.route_for(env)
+      return set_controller_action if route
+
+      not_found
     end
 
     private
