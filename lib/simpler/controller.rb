@@ -54,7 +54,7 @@ module Simpler
     end
 
     def params
-      @request.params
+      @request.params.update(@request.env['simpler.params'])
     end
 
     def plain(text)
