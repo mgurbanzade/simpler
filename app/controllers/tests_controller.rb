@@ -6,9 +6,4 @@ class TestsController < Simpler::Controller
   end
 
   def create; end
-
-  def status(code)
-    @response.status = code
-  end
-
 end
