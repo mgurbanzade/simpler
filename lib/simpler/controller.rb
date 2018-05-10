@@ -24,6 +24,14 @@ module Simpler
 
     private
 
+    def status(code)
+      @response.status = code
+    end
+
+    def headers
+      @response.headers
+    end
+
     def extract_name
       self.class.name.match('(?<name>.+)Controller')[:name].downcase
     end
@@ -32,10 +40,13 @@ module Simpler
       @response['Content-Type'] = 'text/html'
     end
 
-    def write_response
+    def body_response
       body = render_body
-
       @response.write(body)
+    end
+
+    def write_response
+      body_response if @response.body.empty?
     end
 
     def render_body
@@ -43,11 +54,27 @@ module Simpler
     end
 
     def params
-      @request.params
+      @request.env['simpler.params'].merge!(@request.params)
+    end
+
+    def plain(text)
+      @response.write(text)
+      @response['Content-Type'] = 'text/plain'
+    end
+
+    def inline(text)
+      @response.write(ERB.new(text).result(binding))
     end
 
     def render(template)
-      @request.env['simpler.template'] = template
+      case template
+      when template[:plain]
+        plain(template[:plain])
+      when template[:inline]
+        inline(template[:inline])
+      else
+        @request['simpler.template'] = template
+      end
     end
 
   end
